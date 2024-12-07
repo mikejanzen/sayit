@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Random Command Speaker</title>
+</head>
+<body>
+  <h1>Random Command Speaker</h1>
+  <label for="commands">Enter commands (comma-separated):</label>
+  <input type="text" id="commands" value="Right Turn, Left Turn, About Turn, Left Incline, Right Incline">
+  <br><br>
+  <label for="minSleep">Minimum interval (seconds):</label>
+  <input type="number" id="minSleep" value="1.5" step="0.1">
+  <br><br>
+  <label for="maxSleep">Maximum interval (seconds):</label>
+  <input type="number" id="maxSleep" value="3" step="0.1">
+  <br><br>
+  <button id="startButton">Start</button>
+  <button id="stopButton">Stop</button>
+
+  <script>
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    let speakingInterval;
+
+    // Function to speak a command
+    function speakCommand(command) {
+      const synth = window.speechSynthesis;
+      const utterance = new SpeechSynthesisUtterance(command);
+      synth.speak(utterance);
+    }
+
+    // Start speaking commands
+    startButton.addEventListener('click', () => {
+      const commandsInput = document.getElementById('commands').value;
+      const minSleep = parseFloat(document.getElementById('minSleep').value);
+      const maxSleep = parseFloat(document.getElementById('maxSleep').value);
+      const commands = commandsInput.split(',').map(cmd => cmd.trim());
+
+      if (speakingInterval) clearInterval(speakingInterval);
+
+      function speakRandomCommand() {
+        const command = commands[Math.floor(Math.random() * commands.length)];
+        speakCommand(command);
+        const nextInterval = (Math.random() * (maxSleep - minSleep) + minSleep) * 1000;
+        speakingInterval = setTimeout(speakRandomCommand, nextInterval);
+      }
+
+      speakRandomCommand();
+    });
+
+    // Stop speaking commands
+    stopButton.addEventListener('click', () => {
+      if (speakingInterval) {
+        clearTimeout(speakingInterval);
+        speakingInterval = null;
+      }
+    });
+  </script>
+</body>
+</html>
