@@ -99,13 +99,18 @@ Right Incline
   <br><br>
   <button id="startButton">Start</button>
   <button id="stopButton" disabled="true">Stop</button>
+  <div id="timer" style="margin-top: 10px; font-size: 1.2em;">Time: 0s</div>
+  <div id="numCommands" style="margin-top: 10px; font-size: 1.2em;">Commands: 0</div>
 
   <script>
     const startButton = document.getElementById('startButton');
     const stopButton = document.getElementById('stopButton');
     let speakingInterval;
     let stopper = false;
-    let preferredVoice=null;
+    let preferredVoice = null;
+    let startTime;
+    let timerInterval;
+    let numCommands = 0;
     const synth = window.speechSynthesis;
 
     // wait on voices to be loaded before fetching list
@@ -136,20 +141,33 @@ Right Incline
       synth.speak(utterance);
     }
 
-    // Start speaking commands
+    // Add function to update timer
+    function updateTimer() {
+      const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+      document.getElementById('timer').textContent = `Time: ${elapsedSeconds}s`;
+    }
+
+    // Modify the start button event listener
     startButton.addEventListener('click', () => {
-      
       if (speakingInterval) clearInterval(speakingInterval);
-
+      
+      // Reset and start timer
+      startTime = Date.now();
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 1000);
+      
       function speakRandomCommand() {
-
         if (this.stopper == true){
           this.stopper = false;
           startButton.disabled = false;
           stopButton.disabled = true;
+          clearInterval(timerInterval);
+          numCommands = 0;
 
           return;
        }
+       numCommands++;
+       document.getElementById('numCommands').textContent = `Commands: ${numCommands}`;
 
         const commandsInput = document.getElementById('commands').value;
         const minSleep = parseFloat(document.getElementById('minSleep').value);
@@ -166,7 +184,7 @@ Right Incline
       speakRandomCommand();
     });
 
-    // Stop speaking commands
+    // Modify the stop button event listener
     stopButton.addEventListener('click', () => {
       this.stopper = true;
     });
